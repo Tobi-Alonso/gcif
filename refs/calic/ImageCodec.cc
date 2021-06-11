@@ -1,4 +1,6 @@
 #include "ImageCodec.h"
+// #include <sys/time.h>
+#include <time.h>
 
 /*************************************************************************
 
@@ -81,12 +83,25 @@ int ImageCodec::encode() {
   enc->startEncoding();
   dec->startDecoding();
 
+  timespec fin,ini;
+  int compress_img_size;
+  clock_gettime(CLOCK_MONOTONIC, &ini);
+
+
   startEncode();
 
   dec->stopDecoding();
   enc->stopEncoding();
 
   encFinalize();
+
+  clock_gettime(CLOCK_MONOTONIC, &fin);
+   
+  
+  float enc_time = ((fin.tv_sec+fin.tv_nsec* 1E-9)-(ini.tv_sec+ini.tv_nsec* 1E-9));
+  float enc_bw = dec->getWidth()*dec->getHeight()/(1024*1024*enc_time);
+  printf("Encoder time: %.3f | BW: %.3f MP/s |", enc_time,enc_bw );
+
   return 0;
 }
 

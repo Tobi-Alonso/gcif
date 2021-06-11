@@ -1,5 +1,6 @@
 #include "Arithm.h"
 #include <stdio.h>
+#include <string.h> // memcpy
 
 AdaptiveModel::AdaptiveModel() {
   numb_symb = 0;

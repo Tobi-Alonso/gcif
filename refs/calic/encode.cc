@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   bool binaryMode;
   bool verboseMode;
   int debugLevel;
-  char inputFilename[256], outputFilename[256];
+  char inputFilename[512], outputFilename[512];
 
   // --------------- Parse command line parameters --------------
 

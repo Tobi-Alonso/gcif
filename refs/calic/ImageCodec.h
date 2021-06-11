@@ -7,6 +7,7 @@
 #include <pnm.h>
 #include "Arithm.h"
 #include "Image.h"
+#include <string.h>
 
 #define DEFAULT_SIGNATURE 	"cj08"
 #define DEFAULT_SYMBOL_COUNT	256

@@ -17,7 +17,7 @@
 #include <string.h>
 
 #ifndef MAX_STR_LEN
-#define MAX_STR_LEN 64
+#define MAX_STR_LEN 128
 #endif  
 
 class CommandLine {
