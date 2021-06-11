@@ -199,6 +199,8 @@ protected:
 
 class CALICImageCodec : public ImageCodec {
 protected:
+  //near lossless operation
+  int near , delta ;
 
   PGMImageEncoder *pgmEnc;		// Arithmetic encoder
   PGMImageDecoder *pgmDec;		// Arithmetic decoder
@@ -227,7 +229,7 @@ public:
   int regularModeCount; 
   int escapedBinaryModeCount;
 
-  CALICImageCodec() : ImageCodec() {
+  CALICImageCodec() : ImageCodec(),near(1),delta(3) {
     binaryModeEnabled = true;
     binaryModeCount = regularModeCount = escapedBinaryModeCount = 0;
     errorModel = new StatisticalModel(4 * 256 + 1, 128);

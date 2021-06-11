@@ -30,13 +30,20 @@ OBJS = $(ARITHM_OBJS) $(PNM_OBJS) $(MISC_OBJS) $(IMAGECODEC_OBJS)
 
 INCDIR = .
 
-CFLAGS = -O2 -I$(INCDIR) -D$(ARCH)
+.PHONY: debug release
+
+debug: CFLAGS = -g -I$(INCDIR) -D$(ARCH)
+debug: $(PROGRAMS)
+
+release: CFLAGS = -O3 -I$(INCDIR) -D$(ARCH) -DNDEBUG
+release: $(PROGRAMS)
+  
 
 .SUFFIXES: .cc .
 .cc.o:
 	$(CC) -c $(INCLUDE) $(CFLAGS) $<
 
-all: $(PROGRAMS)
+all: release
 
 encode: $(OBJS) encode.o 
 	$(CC) -o $@ encode.o $(OBJS) -lm

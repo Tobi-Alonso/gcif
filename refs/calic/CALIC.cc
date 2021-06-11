@@ -1,5 +1,18 @@
 #include "CALIC.h"
 
+#define NEAR_LOSSLESS 1
+
+#if NEAR_LOSSLESS
+int UQ(int error, int delta, int near){
+  if(error > 0){
+    error = (near + error)/delta;
+  }else{
+    error = -(near - error)/delta;
+  }
+  return error;
+}
+#endif
+
 void CALICImageCodec::encInit() {
   delete dec;
   delete enc;
@@ -111,7 +124,13 @@ int CALICImageCodec::predict_LOCO(int x, int y) {
 
 void CALICImageCodec::encode_border(int x, int y) {
   int pixel = dec->read();
-  int error = pixel - getPredicted();
+  int pred = getPredicted();
+  int error = pixel - pred;
+
+  #if NEAR_LOSSLESS
+  error = UQ(error,delta,near);
+  pixel = ensureBounds(pred+error*delta);
+  #endif
 
   updateImageBuffer(x, y, pixel, error);
   error = encRemapError(false, symbolCount, error, getPredicted());
@@ -122,7 +141,14 @@ void CALICImageCodec::decode_border(int x, int y) {
   int error = calicDec->readContinuousModeSymbol(entropyModel->continuousModelCount-1);
   error = decRemapError(false, symbolCount, error, getPredicted());
 
+  // Recover the pixel value
+  #if NEAR_LOSSLESS
+  int pixel = error*delta + getPredicted();
+  pixel = ensureBounds(pixel);
+  #else
   int pixel = error + getPredicted();
+  #endif
+
   updateImageBuffer(x, y, pixel, error);
   enc->write(pixel);
 }
@@ -166,6 +192,13 @@ void CALICImageCodec::encContinuousMode(int x, int y) {
 
   currentPixel = srcImg->getPixel(x, y);
   error = currentPixel - predicted;
+
+  //nearlossless quantization
+  #if NEAR_LOSSLESS
+  error = UQ(error,delta,near);
+  // error = l*delta;
+  currentPixel = ensureBounds(predicted+error*delta);
+  #endif
   updateImageBuffer(x, y, currentPixel, error);
 
   // Remap and encode error. 
@@ -221,8 +254,19 @@ void CALICImageCodec::decContinuousMode(int x, int y) {
 
   error = decRemapError(errorModel->isNegative(context), symbolCount, error, predicted);
 
+  #if NEAR_LOSSLESS
+  //near-lossless recovery
+  // error = error*delta;
+
+  // Recover the pixel value
+  currentPixel = error*delta + predicted;
+  currentPixel = ensureBounds(currentPixel);
+  #else
   // Recover the pixel value
   currentPixel = error + predicted;
+
+  #endif
+
   updateImageBuffer(x, y, currentPixel, error);
 
   enc->write(currentPixel);
@@ -353,10 +397,14 @@ void CALICImageCodec::gradientAdjustedPrediction(int x, int y,
 
 ------------------------------------------------------------------------*/
 int CALICImageCodec::computeEnergy(int x, int y, int dh, int dv) {
-//  return quantizeEnergy(dh + dv + 2 * abs(errImg->getPixel(x-1, y)));
+  #if 1 // Original algorithm 
+  return quantizeEnergy(dh + dv + (abs(errImg->getPixel(x-1, y))<<1));
+  #else
   return quantizeEnergy(dh + dv + 
                         abs(errImg->getPixel(x-1, y)) + 
                         abs(errImg->getPixel(x, y-1)));
+  #endif
+                                                              //                        
 }
 
 /************************************************************************

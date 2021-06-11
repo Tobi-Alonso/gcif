@@ -74,7 +74,10 @@ void ImageCodec::readReferenceImage() {
 int ImageCodec::encode() {
   ASSERT(inFilename != NULL, "Input filename has not been specified.");
   ASSERT(outFilename != NULL, "Output filename has not been specified.");
-
+  
+  timespec fin,ini;
+  clock_gettime(CLOCK_MONOTONIC, &ini);
+    
   encInit();
 
   ASSERT(enc != NULL, "ImageEncoder is NULL");
@@ -82,11 +85,6 @@ int ImageCodec::encode() {
 
   enc->startEncoding();
   dec->startDecoding();
-
-  timespec fin,ini;
-  int compress_img_size;
-  clock_gettime(CLOCK_MONOTONIC, &ini);
-
 
   startEncode();
 
@@ -100,7 +98,7 @@ int ImageCodec::encode() {
   
   float enc_time = ((fin.tv_sec+fin.tv_nsec* 1E-9)-(ini.tv_sec+ini.tv_nsec* 1E-9));
   float enc_bw = dec->getWidth()*dec->getHeight()/(1024*1024*enc_time);
-  printf("Encoder time: %.3f | BW: %.3f MP/s |", enc_time,enc_bw );
+  printf("Encoder time: %.3f | BW: %.3f MP/s | \n", enc_time,enc_bw );
 
   return 0;
 }
@@ -128,6 +126,9 @@ int ImageCodec::decode() {
   ASSERT(inFilename != NULL, "Input filename has not been specified.");
   ASSERT(outFilename != NULL, "Output filename has not been specified.");
 
+  timespec fin,ini;
+  clock_gettime(CLOCK_MONOTONIC, &ini);
+
   decInit();
 
   ASSERT(enc != NULL, "ImageEncoder is NULL");
@@ -142,6 +143,14 @@ int ImageCodec::decode() {
   enc->stopEncoding();
 
   decFinalize();
+
+  clock_gettime(CLOCK_MONOTONIC, &fin);
+   
+  
+  float elap_time = ((fin.tv_sec+fin.tv_nsec* 1E-9)-(ini.tv_sec+ini.tv_nsec* 1E-9));
+  float comp_bw = dec->getWidth()*dec->getHeight()/(1024*1024*elap_time);
+  printf("Decoder time: %.3f | BW: %.3f MP/s | \n", elap_time,comp_bw );
+
   return 0;
 }
 
@@ -178,7 +187,7 @@ void ImageCodec::startEncode() {
     encode_x_0(x);
   }
 
-  //----------------------------- First row --------------------------------
+  //----------------------------- Second row --------------------------------
   setPredicted(predict_0_1());
   encode_0_1();
   setPredicted(predict_1_1());
