@@ -32,7 +32,7 @@ CommandLine::~CommandLine() {
 //   Otherwise it returns False.
 //
 //////////////////////////////////////////////////////////////////////
-bool CommandLine::getOption(char *str) {
+bool CommandLine::getOption(const char *str) {
     
   for (int i = 1; i < argc; i++)
     if (argv[i][0] == '-' && (strcmp(argv[i] + 1, str) == 0)) 
@@ -57,7 +57,7 @@ bool CommandLine::getOption(char *str) {
 //   line will be stored in "var. Otherwise it returns false.
 //
 //////////////////////////////////////////////////////////////////////
-bool CommandLine::getParameter(char *str, char *var) {
+bool CommandLine::getParameter(const char *str, char *var) {
 
   for (int i = 1; i < argc - 1; i++)
     if (argv[i][0] == '-' && (strcmp(argv[i] + 1, str) == 0)) {
@@ -67,7 +67,7 @@ bool CommandLine::getParameter(char *str, char *var) {
   return false; 
 }
 
-bool CommandLine::getParameter(char *str, int *var) {
+bool CommandLine::getParameter(const char *str, int *var) {
 
   for (int i = 1; i < argc - 1; i++)
     if (argv[i][0] == '-' && (strcmp(argv[i] + 1, str) == 0)) {
@@ -77,7 +77,7 @@ bool CommandLine::getParameter(char *str, int *var) {
   return false;
 }
 
-bool CommandLine::getParameter(char *str, float *var) {
+bool CommandLine::getParameter(const char *str, float *var) {
 
   for (int i = 1; i < argc - 1; i++)
     if (argv[i][0] == '-' && (strcmp(argv[i] + 1, str) == 0)) {
@@ -87,7 +87,7 @@ bool CommandLine::getParameter(char *str, float *var) {
   return false;
 }
 
-bool CommandLine::getParameter(char *str, double *var) {
+bool CommandLine::getParameter(const char *str, double *var) {
 
   for (int i = 1; i < argc - 1; i++)
     if (argv[i][0] == '-' && (strcmp(argv[i] + 1, str) == 0)) {
@@ -119,7 +119,7 @@ void CommandLine::setArguements(int _argc, char *_argv[]) {
     }
 }
 
-void printUsage(char *usage[]) {
+void printUsage(const char *usage[]) {
   for (int i = 0; usage[i] != NULL; i++)
     fprintf(stderr, "%s\n", usage[i]);
 }

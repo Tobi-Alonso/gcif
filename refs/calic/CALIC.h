@@ -229,7 +229,7 @@ public:
   int regularModeCount; 
   int escapedBinaryModeCount;
 
-  CALICImageCodec() : ImageCodec(),near(1),delta(3) {
+  CALICImageCodec(int _near = 0) : ImageCodec(),near(_near),delta(_near*2 + 1) {
     binaryModeEnabled = true;
     binaryModeCount = regularModeCount = escapedBinaryModeCount = 0;
     errorModel = new StatisticalModel(4 * 256 + 1, 128);

@@ -3,7 +3,7 @@
 
 #include "CALIC.h"
 
-static char *usage[] = {
+static const char *usage[] = {
   "Usage: encode [options] -in <input: PGM image> -out <output: encoded image>",
   "Options:",
   "  -b 	 	Turn off binary mode.",
@@ -42,8 +42,11 @@ int main(int argc, char *argv[]) {
     debugLevel = 0;
 
   // -------------------------------------------------------------
-
-  CALICImageCodec *codec = new CALICImageCodec();
+  int near ;
+  if(cmdline.getParameter("e", &near) == false) {
+    near = 0;
+  }
+  CALICImageCodec *codec = new CALICImageCodec(near);
   codec->setInputImageFilename(inputFilename);
   codec->setOutputImageFilename(outputFilename);
   codec->setBinaryModeEnabled(binaryMode);
@@ -62,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     FILE *ofp;
 
-    char errorFilename[256];
+    char errorFilename[516];
     sprintf(errorFilename, "%s.err", outputFilename);
 
     if ((ofp = fopen(errorFilename, "w")) == NULL) {

@@ -1,6 +1,6 @@
 ARCH = $(shell uname)
 
-CC = g++ -Wall
+CC = g++ -Wall -Wno-write-strings
 
 PROGRAMS = encode decode 
 
@@ -30,13 +30,20 @@ OBJS = $(ARITHM_OBJS) $(PNM_OBJS) $(MISC_OBJS) $(IMAGECODEC_OBJS)
 
 INCDIR = .
 
-.PHONY: debug release
+.PHONY: debug release clean
 
-debug: CFLAGS = -g -I$(INCDIR) -D$(ARCH)
+debug: clean
+debug: CFLAGS = -g -I$(INCDIR) -D$(ARCH) -DANALYSIS
 debug: $(PROGRAMS)
 
-release: CFLAGS = -O3 -I$(INCDIR) -D$(ARCH) -DNDEBUG
+release: clean
+release: CFLAGS = -O3 -I$(INCDIR) -D$(ARCH) -DNDEBUG 
 release: $(PROGRAMS)
+
+profiling: clean
+profiling: CFLAGS = -O3 -I$(INCDIR) -D$(ARCH) -DNDEBUG -pg
+profiling: LINK_FLAGS = -pg
+profiling: $(PROGRAMS)
   
 
 .SUFFIXES: .cc .
@@ -46,10 +53,10 @@ release: $(PROGRAMS)
 all: release
 
 encode: $(OBJS) encode.o 
-	$(CC) -o $@ encode.o $(OBJS) -lm
+	$(CC) -o $@ $(LINK_FLAGS) encode.o $(OBJS) -lm
 
 decode: $(OBJS) decode.o
-	$(CC) -o $@ decode.o $(OBJS) -lm
+	$(CC) -o $@ $(LINK_FLAGS) decode.o $(OBJS) -lm
 
 clean:
 	rm -rf *.o $(PROGRAMS) core

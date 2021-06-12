@@ -32,14 +32,14 @@ public:
   ~CommandLine();
 
   void setArguements(int, char **);
-  bool getOption(char *);
-  bool getParameter(char *, char *);
-  bool getParameter(char *, int *);
-  bool getParameter(char *, float *);
-  bool getParameter(char *, double *);
+  bool getOption(const char *);
+  bool getParameter(const char *, char *);
+  bool getParameter(const char *, int *);
+  bool getParameter(const char *, float *);
+  bool getParameter(const char *, double *);
 };
 
-void printUsage(char *usage[]);
+void printUsage(const char *usage[]);
 
-#endif __CMDLINE_H__
+#endif //__CMDLINE_H__
 
