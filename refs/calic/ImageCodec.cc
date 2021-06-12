@@ -254,7 +254,7 @@ void ImageCodec::startDecode() {
   if (imgH < 2)
     return;
 
-  //----------------------------- First row --------------------------------
+  //----------------------------- Second row --------------------------------
   setPredicted(predict_0_1());
   decode_0_1();
   setPredicted(predict_1_1());

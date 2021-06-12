@@ -29,7 +29,9 @@ public:
   inline int NN(int x, int y) { return pixels[(y  - 2) * w + x]; }
   inline int NNE(int x, int y) { return pixels[(y - 2) * w + x + 1]; }
   inline int NNW(int x, int y) { return pixels[(y - 2) * w + x - 1]; }
-  inline int NWW(int x, int y) { return pixels[(y - 2) * w + x - 2]; }
+  inline int NWW(int x, int y) { return pixels[(y - 1) * w + x - 2]; }
+  inline int NNWW(int x, int y) { return pixels[(y - 2) * w + x - 2]; }
+  inline int NNEE(int x, int y) { return pixels[(y - 2) * w + x + 2]; }
 };
 
 class ShortImage {
