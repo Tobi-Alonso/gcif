@@ -1,8 +1,14 @@
 #include "StatisticalModel.h"
 
 void StatisticalModel::reset() {
-  for (int i = 0; i < size; i++)
-    model[i] = modelCount[i] = 0;
+  for (int i = 0; i < size; i++){
+    model[i] = 0;
+    #ifdef CONTEXT_CNT_INIT
+    modelCount[i] = 1;
+    #else
+    modelCount[i] = 0;
+    #endif
+  }
 }
 
 int StatisticalModel::write(char *filename) {

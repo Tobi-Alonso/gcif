@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+#define CONTEXT_CNT_INIT
 class StatisticalModel {
 public:
   int maxErrorCount;            // When the # of errors modeled by a context reaches this
@@ -37,16 +38,19 @@ public:
     modelCount[context] ++;
 
     if (modelCount[context] == maxErrorCount) {
-      model[context] /= 2;
-      modelCount[context] /= 2;
+      model[context] >>= 1;
+      modelCount[context] >>= 1;
     }
   }
 
   int getExpectation(int context) {
+    #ifdef CONTEXT_CNT_INIT
+      return model[context]/ modelCount[context];
+    #else
     if (modelCount[context] > 0)
-      return (model[context] + modelCount[context]/2) /
+      return (model[context] + (modelCount[context]>>1)) /
              modelCount[context];
-
+    #endif
     return 0;
   }
 

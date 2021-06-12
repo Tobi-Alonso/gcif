@@ -20,10 +20,15 @@
 #define MaxFrequency  16383L   /* 2^14 - 1 */
 
 #undef ASSERT
+#ifndef NDEBUG
 #define ASSERT(flag, msg)   if (!(flag)) {\
                               fprintf(stderr, "%s (%d): %s\n",  __FILE__, __LINE__, (msg));\
                               exit(1);\
                             }
+#else
+#define ASSERT(flag, msg)
+#endif
+
 
 
 

@@ -169,7 +169,9 @@ void CALICImageCodec::encode_x_y(int x, int y) {
 
 void CALICImageCodec::encContinuousMode(int x, int y) {
 
+  #ifdef ANALYSIS
   regularModeCount++;
+  #endif
 
   // ---------- Perform prediction ------------
 
@@ -282,7 +284,9 @@ bool CALICImageCodec::encBinaryMode(int x, int y) {
 
   int currentPixel = srcImg->getPixel(x, y);
 
+  #ifdef ANALYSIS
   binaryModeCount++;
+  #endif
 
   if (currentPixel == s1) {
     updateImageBuffer(x, y, currentPixel, 0);
@@ -346,7 +350,7 @@ bool CALICImageCodec::decBinaryMode(int x, int y) {
 void CALICImageCodec::gradientAdjustedPrediction(int x, int y, 
                                                  int *dh, int *dv, 
                                                  int *predicted) {
-  #define GAP_LE
+  // #define GAP_LE
   #ifdef GAP_LE
     const int W = srcImg->W(x, y);
     const int N = srcImg->N(x, y);
@@ -389,52 +393,53 @@ void CALICImageCodec::gradientAdjustedPrediction(int x, int y,
         *predicted = (3 * *predicted + N) / 4;
     }
 
-#else
-// Map of pixels:
-  // |NNWW|NNW|NN|NNE|NNEE|
-  // |NWW |NW |N |d  |
-  // |WW  |W  |x |
+  #else // original algorithm
+    // Map of pixels:
+    // |NNWW|NNW|NN|NNE|NNEE|
+    // |NWW |NW |N |d  |
+    // |WW  |W  |x |
 
-  int W  = srcImg->W(x,y);
-  int NW  = srcImg->NW(x,y); 
-  int N  = srcImg->N(x,y); 
-  int NE  = srcImg->NE(x,y); 
-  int WW  = srcImg->WW(x,y); 
-  int NWW  = srcImg->NWW(x,y); 
-  int NNWW  = srcImg->NNWW(x,y); 
-  int NNW  = srcImg->NNW(x,y); 
-  int NN = srcImg->NN(x,y); 
-  int NNE = srcImg->NNE(x,y); 
-  int NNEE  = srcImg->NNEE(x,y); 
+    int W  = srcImg->W(x,y);
+    int NW  = srcImg->NW(x,y); 
+    int N  = srcImg->N(x,y); 
+    int NE  = srcImg->NE(x,y); 
+    int WW  = srcImg->WW(x,y); 
+    int NWW  = srcImg->NWW(x,y); 
+    int NNWW  = srcImg->NNWW(x,y); 
+    int NNW  = srcImg->NNW(x,y); 
+    int NN = srcImg->NN(x,y); 
+    int NNE = srcImg->NNE(x,y); 
+    int NNEE  = srcImg->NNEE(x,y); 
 
-  int d_h = abs(WW-W)+abs(NW-N)+abs(N-NE);
-  int d_v = abs(W-NW)+abs(NW-NNW)+abs(N-NN);
-  int d_45 = abs(W-NWW)+abs(NW-NNWW)+abs(N-NNW);
-  int d_135 = abs(W-N)+abs(N-NNE)+abs(NE-NNEE);
+    int d_h = abs(WW-W)+abs(NW-N)+abs(N-NE);
+    int d_v = abs(W-NW)+abs(NW-NNW)+abs(N-NN);
+    int d_45 = abs(W-NWW)+abs(NW-NNWW)+abs(N-NNW);
+    int d_135 = abs(W-N)+abs(N-NNE)+abs(NE-NNEE);
 
-  int aux_pred;
-  if(d_v + d_h > 32) { //sharp edge
-    aux_pred = (d_v*W + d_h*N + 16)/(d_v+d_h)+(NE-NW)/8;
-  }else if (d_v - d_h > 12){ // horizontal edge
-    aux_pred = (2*W + N)/3 + (NE - NW)/8 ;
-  }else if (d_h - d_v > 12){ // vertical edge
-    aux_pred = (W + 2*N)/3 + (NE - NW)/8 ;
-  }else{ //smooth area
-    aux_pred = (W + N)/2 + (NE - NW)/8;
-  }
+    int aux_pred;
+    if(d_v + d_h > 32) { //sharp edge
+      aux_pred = (d_v*W + d_h*N )/(d_v+d_h)+(NE-NW)/8;
+    }else if (d_v - d_h > 12){ // horizontal edge
+      aux_pred = ((W<<1) + N)/3 + (NE - NW)/8 ;
+    }else if (d_h - d_v > 12){ // vertical edge
+      aux_pred = (W + (N<<1))/3 + (NE - NW)/8 ;
+    }else{ //smooth area
+      aux_pred = ((W + N)>>1) + (NE - NW)/8;
+    }
 
-  if (d_45 - d_135 > 32){ // sharp 135-deg diagonal edge
-    aux_pred += (NE - NW)/8;
-  }else if (d_45 - d_135 > 16){ // 135-deg diagonal edge
-    aux_pred += (NE - NW)/16;
-  }else if (d_135 - d_45 > 32){ // sharp 45-deg diagonal edge
-    aux_pred += (NW - NE)/8;
-  }else if (d_135 - d_45 > 16){ // 45-deg diagonal edge
-    aux_pred += (NW - NE)/16;
-  }
+    if (d_45 - d_135 > 32){ // sharp 135-deg diagonal edge
+      aux_pred += (NE - NW)/8;
+    }else if (d_45 - d_135 > 16){ // 135-deg diagonal edge
+      aux_pred += (NE - NW)/16;
+    }else if (d_135 - d_45 > 32){ // sharp 45-deg diagonal edge
+      aux_pred += (NW - NE)/8;
+    }else if (d_135 - d_45 > 16){ // 45-deg diagonal edge
+      aux_pred += (NW - NE)/16;
+    }
 
-  *predicted = aux_pred; 
-    
+    *predicted = aux_pred; 
+    *dh = d_h;
+    *dv = d_v;
   #endif
 }
 
