@@ -1,3 +1,9 @@
+## Modifications included in this fork
+- Some support to near-lossless compression (the near paramenter is not yet included in the compress image header, then it needs to be explicitly provided to the decoder. the impact in avg compression is negligible )
+
+
+
+## Original README
 This is my attempt to implement CALIC based on the following paper:
 
   Wu, Xiaolin and Memon, Nasir,"Context-Based, Adaptive, Lossless Image Coding", 
