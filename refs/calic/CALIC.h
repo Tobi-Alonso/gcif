@@ -25,6 +25,9 @@
 
 #define DEFAULT_SYMBOL_COUNT	256
 
+#define NEAR_LOSSLESS 1
+
+
 // CALIC specific codec model
 class CALICEntropyModel: public ImageCodecModel {
 public:
@@ -228,20 +231,37 @@ public:
   int binaryModeCount;		// Keep the number of pixels that result in binary mode.
   int regularModeCount; 
   int escapedBinaryModeCount;
-
+  int _UQ_lut[511], *UQ_lut=(_UQ_lut+255);
   CALICImageCodec(int _near = 0) : ImageCodec(),near(_near),delta(_near*2 + 1) {
     binaryModeEnabled = true;
     binaryModeCount = regularModeCount = escapedBinaryModeCount = 0;
     errorModel = new StatisticalModel(4 * 256 + 1, 128);
     entropyModel = new CALICEntropyModel();
     resetModel = true;
-
+    for(int error = -255; error < 255; ++error) {
+      *(UQ_lut+error)= _UQ( error, delta, near);
+    }
 //    hist = new Histogram(0, 255);
   }
 
   virtual ~CALICImageCodec() {
     delete errorModel;
   }
+
+  #if NEAR_LOSSLESS
+  int _UQ(int error, int delta, int near){
+    if(error > 0){
+      error = (near + error)/delta;
+    }else{
+      error = -(near - error)/delta;
+    }
+    return error;
+  }
+
+  inline int UQ(int error, int delta, int near){
+    return *(UQ_lut+error);
+  }
+  #endif
 
   void setBinaryModeEnabled(bool _mode) { binaryModeEnabled = _mode; }
   bool isBinaryModeEnabled() { return binaryModeEnabled; }

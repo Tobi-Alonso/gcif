@@ -1,17 +1,5 @@
 #include "CALIC.h"
 
-#define NEAR_LOSSLESS 1
-
-#if NEAR_LOSSLESS
-int UQ(int error, int delta, int near){
-  if(error > 0){
-    error = (near + error)/delta;
-  }else{
-    error = -(near - error)/delta;
-  }
-  return error;
-}
-#endif
 
 void CALICImageCodec::encInit() {
   delete dec;
@@ -350,7 +338,7 @@ bool CALICImageCodec::decBinaryMode(int x, int y) {
 void CALICImageCodec::gradientAdjustedPrediction(int x, int y, 
                                                  int *dh, int *dv, 
                                                  int *predicted) {
-  // #define GAP_LE
+  #define GAP_LE
   #ifdef GAP_LE
     const int W = srcImg->W(x, y);
     const int N = srcImg->N(x, y);
@@ -368,32 +356,28 @@ void CALICImageCodec::gradientAdjustedPrediction(int x, int y,
           abs(N - NN) +
           abs(NE - NNE);
 
-    int tmp = *dv - *dh;
+    int grad_diff = *dv - *dh;
 
-    if (tmp > 80)
+    if (grad_diff > 80){
       *predicted = W;
-    else
-    if (tmp < -80)
+    } else if (grad_diff < -80){
       *predicted = N;
-    else {
-
-      *predicted = ((W + N) / 2) +
+    } else {
+      *predicted = ((W + N) >>1 ) +
                       ((NE - NW) / 4);
 
-      if (tmp > 32)
-        *predicted = (*predicted + W) / 2;
-      else
-      if (tmp > 8)
-        *predicted = (3 * *predicted + W) / 4;
-      else
-      if (tmp < -32)
-        *predicted = (*predicted + N) / 2;
-      else
-      if (tmp < -8)
-        *predicted = (3 * *predicted + N) / 4;
+      if (grad_diff > 32){
+        *predicted = (*predicted + W) >>1;
+      } else if (grad_diff > 8){
+        *predicted = (3 * *predicted + W) >>2;
+      } else if (grad_diff < -32){
+        *predicted = (*predicted + N) >>1;
+      } else if (grad_diff < -8){
+        *predicted = (3 * *predicted + N) >>2;
+      }
     }
 
-  #else // original algorithm
+  #else // original prediction
     // Map of pixels:
     // |NNWW|NNW|NN|NNE|NNEE|
     // |NWW |NW |N |d  |
